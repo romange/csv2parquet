@@ -262,7 +262,7 @@ class DrillScript:
             raise DrillScriptError(proc.returncode)
 
         # publish resulting output parquet file
-        os.rename(self.drill.location.full_path('parquet_tmp_output'), self.parquet_output)
+        shutil.move(self.drill.location.full_path('parquet_tmp_output'), self.parquet_output)
 
 # helper functions
 def get_args():
