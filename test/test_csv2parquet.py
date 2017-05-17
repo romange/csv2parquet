@@ -96,7 +96,7 @@ columns[5] as `Volume`,
 columns[6] as `Ex-Dividend`,
 CASE when columns[7]='Split Ratio' then CAST(NULL AS FLOAT) else CAST(columns[7] as FLOAT) end as `Split Ratio`,
 CASE when columns[8]='Adj. Open' then CAST(NULL AS DOUBLE) else CAST(columns[8] as DOUBLE) end as `Adj Open`
-FROM dfs.`/path/to/input.csv`
+FROM TABLE(dfs.`/path/to/input.csv`(type=>'text', fieldDelimiter => ','))
 OFFSET 1
 '''.strip()
         columns = [
