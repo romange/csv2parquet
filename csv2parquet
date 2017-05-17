@@ -317,7 +317,7 @@ SELECT
 '''.format(parquet_output)
     column_lines = [column.line(n) for n, column in enumerate(columns)]
     script += ',\n'.join(column_lines) + '\n'
-    script += 'FROM TABLE(dfs.`{}`(type=>\'text\', fieldDelimiter => \'{}\'))\n'.format(csv_input, args.delimiter)
+    script += 'FROM TABLE(dfs.`{}`(type=>\'text\', fieldDelimiter=>\'{}\'))\n'.format(csv_input, args.delimiter)
     script += 'OFFSET 1\n'
     return script
     
