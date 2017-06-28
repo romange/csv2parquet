@@ -18,7 +18,7 @@ Contact" below to reach the author.
 
 # Usage
 
-```csv2parquet CSV_INPUT PARQUET_OUTPUT [--column-map ...] [--types ...] ```
+```csv2parquet CSV_INPUT PARQUET_OUTPUT [--column-map ...] [--types ...] [--delimiter <delimiter>]```
 
 `csv_input` is a CSV file, whose first line defines the column names.
 `parquet_output` is the Parquet output (i.e., directory in which one
@@ -116,7 +116,6 @@ differently ("python" for 2.7, and "python3" for 3.x). So you can
 In terms of priority:
 
  * Adding certain important features, including:
-   - delimiters other than commas
    - CSV files without header lines
  * Running `csv2parquet` on Windows
 

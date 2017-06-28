@@ -23,6 +23,9 @@ column names:
 To provide types for columns, use --types:
   csv2parquet data.csv data.parquet --types "CSV Column Name" "INT"
 
+To provide a custom delimiter, use --delimiter:
+  csv2parquet data.tsv data.parquet --delimiter $'\t'
+
 See documentation (README.md in the source repo) for more information.
 '''.strip()
 
@@ -136,17 +139,18 @@ class Columns:
         return iter(self.items)
         
 class CsvSource:
-    def __init__(self, path: str, name_map: dict = None, type_map: dict = None):
+    def __init__(self, path: str, name_map: dict = None, type_map: dict = None, delimiter: str = ','):
         if name_map is None:
             name_map = {}
         if type_map is None:
             type_map = {}
         self.path = os.path.realpath(path)
+        self.delimiter = delimiter
         self.headers = self._init_headers()
         self.columns = Columns(self.headers, name_map, type_map)
     def _init_headers(self):
         with open(self.path, newline='') as handle:
-            csv_data = csv.reader(handle)
+            csv_data = csv.reader(handle, delimiter=self.delimiter)
             return next(csv_data)
 
 class TempLocation:
@@ -281,6 +285,8 @@ def get_args():
                         help='Map CSV header names to Parquet column names')
     parser.add_argument('--types', nargs='*',
                         help='Map CSV header names to Parquet types')
+    parser.add_argument('--delimiter', default=",",
+                        help='Field delimiter')
     args = parser.parse_args()
     try:
         args.column_map = list2dict(args.column_map)
@@ -311,7 +317,7 @@ SELECT
 '''.format(parquet_output)
     column_lines = [column.line(n) for n, column in enumerate(columns)]
     script += ',\n'.join(column_lines) + '\n'
-    script += 'FROM dfs.`{}`\n'.format(csv_input)
+    script += 'FROM TABLE(dfs.`{}`(type=>\'text\', fieldDelimiter=>\'{}\'))\n'.format(csv_input, args.delimiter)
     script += 'OFFSET 1\n'
     return script
     
@@ -326,7 +332,7 @@ if __name__ == "__main__":
     if os.path.exists(args.parquet_output):
         sys.stderr.write('Output location "{}" already exists. Rename or delete before running again.\n'.format(args.parquet_output))
         sys.exit(1)
-    csv_source = CsvSource(args.csv_input, args.column_map, args.types)
+    csv_source = CsvSource(args.csv_input, args.column_map, args.types, args.delimiter)
     drill = DrillInstallation()
     drill_script = drill.build_script(csv_source, args.parquet_output)
     try:
